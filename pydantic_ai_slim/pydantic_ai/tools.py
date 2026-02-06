@@ -246,8 +246,8 @@ class GenerateToolJsonSchema(GenerateJsonSchema):
             extras_schema = schema.get('extras_schema', None)
             if extras_schema is not None:
                 json_schema['additionalProperties'] = self.generate_inner(extras_schema) or True
-            elif 'additionalProperties' not in json_schema:
-                json_schema['additionalProperties'] = True  # pragma: no cover
+            elif 'additionalProperties' not in json_schema:  # pragma: no cover
+                json_schema['additionalProperties'] = True
         elif extra == 'forbid':
             json_schema['additionalProperties'] = False
         return json_schema
