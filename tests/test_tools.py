@@ -8,7 +8,7 @@ import pydantic_core
 import pytest
 from inline_snapshot import snapshot
 from pydantic import BaseModel, Field, TypeAdapter, WithJsonSchema
-from pydantic.json_schema import JsonSchemaValue
+from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
 from pydantic_core import PydanticSerializationError, core_schema
 from pytest import LogCaptureFixture
 from typing_extensions import TypedDict
@@ -35,14 +35,7 @@ from pydantic_ai.exceptions import ApprovalRequired, CallDeferred, ModelRetry, U
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 from pydantic_ai.models.test import TestModel
 from pydantic_ai.output import ToolOutput
-from pydantic_ai.tools import (
-    DeferredToolRequests,
-    DeferredToolResults,
-    GenerateToolJsonSchema,
-    ToolApproved,
-    ToolDefinition,
-    ToolDenied,
-)
+from pydantic_ai.tools import DeferredToolRequests, DeferredToolResults, ToolApproved, ToolDefinition, ToolDenied
 from pydantic_ai.usage import RequestUsage
 
 from .conftest import IsDatetime, IsStr
@@ -1065,7 +1058,7 @@ def test_call_tool_without_unrequired_parameters():
 
 
 def test_schema_generator():
-    class MyGenerateJsonSchema(GenerateToolJsonSchema):
+    class MyGenerateJsonSchema(GenerateJsonSchema):
         def typed_dict_schema(self, schema: core_schema.TypedDictSchema) -> JsonSchemaValue:
             # Add useless property titles just to show we can
             s = super().typed_dict_schema(schema)
@@ -1083,6 +1076,10 @@ def test_schema_generator():
 
     result = agent.run_sync('Hello')
     json_schema = json.loads(result.output)
+    # my_tool_2 uses GenerateJsonSchema (not GenerateToolJsonSchema), so Pydantic 2.12+
+    # adds additionalProperties: True while <2.12 omits it
+    # we pop it so asserts are consistent across versions
+    json_schema[1]['parameters_json_schema'].pop('additionalProperties', None)
     assert json_schema == snapshot(
         [
             {
@@ -1105,8 +1102,7 @@ def test_schema_generator():
                 'name': 'my_tool_2',
                 'outer_typed_dict_key': None,
                 'parameters_json_schema': {
-                    'additionalProperties': True,
-                    'properties': {'x': {'default': None, 'type': 'string', 'title': 'None title'}},
+                    'properties': {'x': {'default': None, 'type': 'string', 'title': 'X title'}},
                     'type': 'object',
                 },
                 'strict': None,

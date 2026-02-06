@@ -6802,7 +6802,7 @@ requires-dist = [
     { name = "pillow", marker = "extra == 'outlines-transformers'", specifier = ">=11.0.0" },
     { name = "prefect", marker = "extra == 'prefect'", specifier = ">=3.4.21" },
     { name = "prompt-toolkit", marker = "extra == 'cli'", specifier = ">=3" },
-    { name = "pydantic", specifier = ">=2.12" },
+    { name = "pydantic", specifier = ">=2.10" },
     { name = "pydantic-evals", marker = "extra == 'evals'", editable = "pydantic_evals" },
     { name = "pydantic-graph", editable = "pydantic_graph" },
     { name = "pyperclip", marker = "extra == 'cli'", specifier = ">=1.9.0" },
